@@ -241,9 +241,13 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-        HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-        OTHER_LDFLAGS = "-filelist ../build/libhello.list -lz";
+				OTHER_LDFLAGS = (
+					"-filelist",
+					../build/libhello.list,
+					"-lz",
+				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -261,10 +265,14 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-        HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
-        OTHER_LDFLAGS = "-filelist ../build/libhello.list -lz";
+				OTHER_LDFLAGS = (
+					"-filelist",
+					../build/libhello.list,
+					"-lz",
+				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -274,6 +282,7 @@
 		08914C2B142A826B00991C80 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = armv6;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "hello/hello-Prefix.pch";
 				INFOPLIST_FILE = "hello/hello-Info.plist";
@@ -285,6 +294,7 @@
 		08914C2C142A826B00991C80 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = armv6;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "hello/hello-Prefix.pch";
 				INFOPLIST_FILE = "hello/hello-Info.plist";
@@ -312,6 +322,7 @@
 				08914C2C142A826B00991C80 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

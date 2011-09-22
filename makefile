@@ -1,9 +1,20 @@
-target = iPhoneSimulator
-
 platform = darwin
-arch = i386
 mode = debug
 run-proguard = true
+
+ifeq ($(sim),true)
+	target = iPhoneSimulator
+	sdk = iphonesimulator4.3
+	arch = i386
+	arch-flag = -arch i386
+	release = Release-iphonesimulator
+else
+	target = iPhoneOS
+	sdk = iphoneos4.3
+	arch = arm
+	arch-flag = -arch armv6
+	release = Release-iphoneos
+endif
 
 cc = /Developer/Platforms/$(target).platform/Developer/usr/bin/llvm-gcc-4.2
 
@@ -12,7 +23,7 @@ jar = "$(JAVA_HOME)/bin/jar"
 
 flags = -isysroot \
 	/Developer/Platforms/$(target).platform/Developer/SDKs/$(target)4.3.sdk \
-	-arch i386
+	$(arch-flag)
 
 cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 \
 	-fobjc-abi-version=2 -fobjc-legacy-dispatch \
@@ -71,7 +82,7 @@ codeimage-bin = $(build)/codeimage.bin
 codeimage-object = $(build)/codeimage-bin.o
 
 .PHONY: build
-build: make-vm $(xcode-build)/Release-iphonesimulator/hello.app/hello
+build: make-vm $(xcode-build)/$(release)/hello.app/hello
 
 .PHONY: run
 run: build
@@ -98,8 +109,8 @@ $(vm-classes-dep): $(classes)
 	cp -r $(vm-build)/classpath/* $(stage1)
 	@touch $(@)
 
-$(xcode-build)/Release-iphonesimulator/hello.app/hello: $(build)/libhello.list
-	(cd hello && xcodebuild -sdk iphonesimulator4.3 build)
+$(xcode-build)/$(release)/hello.app/hello: $(build)/libhello.list
+	(cd hello && xcodebuild -sdk $(sdk) build)
 
 $(build)/%.o: $(src)/%.m
 	@mkdir -p $(dir $(@))
