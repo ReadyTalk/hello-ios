@@ -3,7 +3,7 @@
 
 void __cxa_pure_virtual(void) { abort(); }
 
-#define EXPORT __attribute__ ((visibility("default")))
+#define EXPORT __attribute__ ((visibility("default"))) __attribute__ ((used))
 
 #define BOOTIMAGE_BIN(x) _binary_bootimage_bin_##x
 #define CODEIMAGE_BIN(x) _binary_codeimage_bin_##x

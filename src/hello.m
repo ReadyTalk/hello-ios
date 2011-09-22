@@ -1,6 +1,9 @@
 #include <jni.h>
 #import <UIKit/UIKit.h>
 
+#define JNIEXPORT __attribute__ ((visibility("default"))) \
+  __attribute__ ((used))
+
 JNIEXPORT void JNICALL
 Java_Hello_drawText(JNIEnv* e, jclass c, jlong peer, jstring text, int x,
                     int y, jdouble size)
