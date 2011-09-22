@@ -1,5 +1,5 @@
 platform = darwin
-mode = debug
+mode = fast
 run-proguard = true
 
 ifeq ($(sim),true)
