@@ -2,7 +2,7 @@ target = iPhoneSimulator
 
 platform = darwin
 arch = i386
-mode = fast
+mode = debug
 run-proguard = true
 
 cc = /Developer/Platforms/$(target).platform/Developer/usr/bin/llvm-gcc-4.2
@@ -18,8 +18,18 @@ cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 \
 	-fobjc-abi-version=2 -fobjc-legacy-dispatch \
 	-I/System/Library/Frameworks/JavaVM.framework/Headers
 
-lflags = $(flags) -Xlinker -objc_abi_version -Xlinker 2 -framework UIKit \
-	-framework Foundation -framework CoreGraphics
+ifeq ($(mode),debug)
+	cflags += -O0 -g3
+endif
+ifeq ($(mode),debug-fast)
+	cflags += -O0 -g3 -DNDEBUG
+endif
+ifeq ($(mode),fast)
+	cflags += -O3 -g3 -DNDEBUG
+endif
+
+lflags = $(flags) -Xlinker -objc_abi_version -Xlinker 2 \
+	-framework Carbon -framework Foundation -lz
 
 objects = \
 	build/boot.o \
@@ -33,6 +43,7 @@ endif
 
 options := $(options)-bootimage
 
+xcode-build = hello/build
 build = build
 src = src
 stage1 = $(build)/stage1
@@ -60,16 +71,16 @@ codeimage-bin = $(build)/codeimage.bin
 codeimage-object = $(build)/codeimage-bin.o
 
 .PHONY: build
-build: make-vm $(build)/hello.ipa
+build: make-vm $(xcode-build)/Release-iphonesimulator/hello.app/hello
 
 .PHONY: run
 run: build
-	/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone\ Simulator.app/Contents/MacOS/iPhone\ Simulator -SimulateApplication $(build)/Release-iphonesimulator/hello.app
+	/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone\ Simulator.app/Contents/MacOS/iPhone\ Simulator -SimulateApplication $(xcode-build)/Release-iphonesimulator/hello.app
 
 .PHONY: make-vm
 make-vm:
 	(cd $(vm) && \
-	 make mode=$(mode) arch=$(arch) platform=$(platform) bootimage=true)
+	 make mode=$(mode) arch=$(arch) platform=$(platform) bootimage=true ios=true)
 
 $(classes): $(all-javas)
 	@rm -rf $(stage1)
@@ -87,11 +98,7 @@ $(vm-classes-dep): $(classes)
 	cp -r $(vm-build)/classpath/* $(stage1)
 	@touch $(@)
 
-$(build)/hello.ipa: hello/build/Release-iphonesimulator/hello.app/hello
-	#xcrun -sdk iphoneos PackageApplication -v $(build)/hello.app -o $(@)
-	touch $(@)
-
-hello/build/Release-iphonesimulator/hello.app/hello: hello/build/libhello.a
+$(xcode-build)/Release-iphonesimulator/hello.app/hello: $(build)/libhello.list
 	(cd hello && xcodebuild -sdk iphonesimulator4.3 build)
 
 $(build)/%.o: $(src)/%.m
@@ -130,14 +137,16 @@ $(codeimage-object): $(bootimage-bin) $(converter)
 		_binary_codeimage_bin_end $(platform) $(arch) 8 \
 		executable
 
-hello/build/libhello.a: $(objects) $(vm-objects-dep)
+$(build)/libhello.list: $(objects) $(vm-objects-dep)
 	@mkdir -p $(dir $(@))
 	rm -rf $(@)
 	mkdir -p $(build)/libhello
 	cp $(objects) $(build)/vm-objects/*.o $(build)/libhello
-	(cd $(build)/libhello && ar cru ../../$(@) *)
-	ranlib $(@)
+	for x in $(build)/libhello/*.o; do echo ../$${x}; done > $(@)
+
+$(build)/main: $(build)/main.o $(objects) $(vm-objects-dep)
+	$(cc) $(lflags) $(build)/main.o $(objects) $(build)/vm-objects/*.o -o $(@)
 
 .PHONY: clean
 clean:
-	rm -rf $(build)
+	rm -rf $(build) $(xcode-build)
