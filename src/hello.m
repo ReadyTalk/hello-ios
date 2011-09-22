@@ -1,0 +1,18 @@
+#include <jni.h>
+#import <UIKit/UIKit.h>
+
+JNIEXPORT void JNICALL
+Java_Hello_draw(JNIEnv* e, jclass c, jstring text, int x, int y, jdouble size)
+{
+  const char* chars = (*e)->GetStringUTFChars(e, text, 0);
+  NSString* string = [[NSString alloc] initWithUTF8String: chars];
+  (*e)->ReleaseStringUTFChars(e, text, chars);
+
+  CGPoint point = CGPointMake(x, y);
+
+  UIFont* font = [UIFont systemFontOfSize: size];
+
+  [[UIColor whiteColor] set];
+
+  [string drawAtPoint:point withFont:font];
+}
