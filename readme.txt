@@ -1,9 +1,10 @@
 This is a simple example of how to use Avian on iOS.  These are the
 steps required to build it:
 
-  1. Get Avian:
+  1. Get Avian and check out the "ios" branch:
 
     git clone git://oss.readytalk.com/avian.git
+    git checkout ios
 
   2. Get this example, if you don't already have it:
 
