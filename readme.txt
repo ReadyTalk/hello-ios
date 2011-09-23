@@ -17,13 +17,10 @@ steps required to build it:
     cd hello-ios && make
 
   The codesign step may fail with the message "User interaction is not
-  allowed."  The only solution to this I've found is to build the
-  project from the XCode IDE.  To do so, open the hello directory in
-  XCode and build it.  Note that you can't currently build everything
-  from the IDE; you must first run make from the command line to
-  ensure that Avian and the application code in the src diretory are
-  built.  There's probably a way to teach Xcode how to build those
-  parts too, but I haven't taken the time to find out.
+  allowed."  To fix this, you'll need to unlock your keychain and try
+  again:
+
+    security unlock-keychain ~/Library/Keychains/login.keychain
 
   Alternatively, you can target the iPhoneSimulator instead, which
   does not require code signing:
