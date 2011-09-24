@@ -38,6 +38,9 @@ endif
 ifeq ($(mode),fast)
 	cflags += -O3 -g3 -DNDEBUG
 endif
+ifeq ($(mode),small)
+	cflags += -Os -g3 -DNDEBUG
+endif
 
 lflags = $(flags) -Xlinker -objc_abi_version -Xlinker 2 \
 	-framework Carbon -framework Foundation -lz
