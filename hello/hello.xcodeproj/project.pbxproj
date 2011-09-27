@@ -282,7 +282,7 @@
 		08914C2B142A826B00991C80 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = armv6;
+				ARCHS = "armv6 i386";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "hello/hello-Prefix.pch";
 				INFOPLIST_FILE = "hello/hello-Info.plist";
@@ -295,7 +295,7 @@
 		08914C2C142A826B00991C80 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = armv6;
+				ARCHS = "armv6 i386";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "hello/hello-Prefix.pch";
 				INFOPLIST_FILE = "hello/hello-Info.plist";
