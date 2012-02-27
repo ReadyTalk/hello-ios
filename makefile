@@ -4,13 +4,13 @@ run-proguard = true
 
 ifeq ($(sim),true)
 	target = iPhoneSimulator
-	sdk = iphonesimulator4.3
+	sdk = iphonesimulator5.0
 	arch = i386
 	arch-flag = -arch i386
 	release = Release-iphonesimulator
 else
 	target = iPhoneOS
-	sdk = iphoneos4.3
+	sdk = iphoneos5.0
 	arch = arm
 	arch-flag = -arch armv6
 	release = Release-iphoneos
@@ -22,7 +22,7 @@ javac = "$(JAVA_HOME)/bin/javac"
 jar = "$(JAVA_HOME)/bin/jar"
 
 flags = -isysroot \
-	/Developer/Platforms/$(target).platform/Developer/SDKs/$(target)4.3.sdk \
+	/Developer/Platforms/$(target).platform/Developer/SDKs/$(target)5.0.sdk \
 	$(arch-flag)
 
 cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 \
@@ -125,14 +125,17 @@ $(build)/%.o: $(src)/%.c
 
 $(stage2).d: $(classes) $(vm-classes-dep)
 	@mkdir -p $(dir $(@))
-ifeq ($(run-proguard),true)
 	rm -rf $(stage2)
+ifeq ($(run-proguard),true)
 	java -jar $(proguard) \
 		-injars $(stage1) \
 		-outjars $(stage2) \
 		-dontusemixedcaseclassnames \
 		@$(vm)/vm.pro \
 		@hello.pro
+else
+	mkdir -p $(stage2)
+	cp -r $(stage1)/* $(stage2)
 endif
 	@touch $(@)
 
