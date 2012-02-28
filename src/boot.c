@@ -5,6 +5,8 @@ void __cxa_pure_virtual(void) { abort(); }
 
 #define EXPORT __attribute__ ((visibility("default"))) __attribute__ ((used))
 
+#ifdef BOOT_IMAGE
+
 #define BOOTIMAGE_BIN(x) _binary_bootimage_bin_##x
 #define CODEIMAGE_BIN(x) _binary_codeimage_bin_##x
 
@@ -27,3 +29,19 @@ codeimageBin(unsigned* size)
   *size = CODEIMAGE_BIN(end) - CODEIMAGE_BIN(start);
   return CODEIMAGE_BIN(start);
 }
+
+#else // not BOOT_IMAGE
+
+#define BOOT_JAR(x) _binary_boot_jar_##x
+
+extern const uint8_t BOOT_JAR(start)[];
+extern const uint8_t BOOT_JAR(end)[];
+
+EXPORT const uint8_t*
+bootJar(unsigned* size)
+{
+  *size = BOOT_JAR(end) - BOOT_JAR(start);
+  return BOOT_JAR(start);
+}
+
+#endif // not BOOT_IMAGE

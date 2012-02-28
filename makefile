@@ -1,5 +1,6 @@
 platform = darwin
 mode = fast
+process = compile
 run-proguard = true
 
 ifeq ($(sim),true)
@@ -47,15 +48,24 @@ lflags = $(flags) -Xlinker -objc_abi_version -Xlinker 2 \
 
 objects = \
 	build/boot.o \
-	build/hello.o \
-	build/bootimage-bin.o \
-	build/codeimage-bin.o
+	build/hello.o
 
 ifneq ($(mode),fast)
 	options := -$(mode)
 endif
 
-options := $(options)-bootimage
+ifeq ($(process),compile)
+	options := $(options)-bootimage
+	bootimage = bootimage=true
+	cflags += -DBOOT_IMAGE
+	objects += \
+		build/bootimage-bin.o \
+		build/codeimage-bin.o
+else
+	options := $(options)-interpret
+	objects += \
+		build/boot-jar.o
+endif
 
 xcode-build = hello/build
 build = build
@@ -84,6 +94,9 @@ bootimage-object = $(build)/bootimage-bin.o
 codeimage-bin = $(build)/codeimage.bin
 codeimage-object = $(build)/codeimage-bin.o
 
+boot-jar = $(build)/boot.jar
+boot-object = $(build)/boot-jar.o
+
 .PHONY: build
 build: make-vm $(xcode-build)/$(release)/hello.app/hello
 
@@ -94,7 +107,7 @@ run: build
 .PHONY: make-vm
 make-vm:
 	(cd $(vm) && \
-	 make mode=$(mode) arch=$(arch) platform=$(platform) bootimage=true ios=true)
+	 make mode=$(mode) arch=$(arch) platform=$(platform) process=$(process) $(bootimage) ios=true)
 
 $(classes): $(all-javas)
 	@rm -rf $(stage1)
@@ -153,6 +166,13 @@ $(codeimage-object): $(bootimage-bin) $(converter)
 	$(converter) $(codeimage-bin) $(@) _binary_codeimage_bin_start \
 		_binary_codeimage_bin_end $(platform) $(arch) 8 \
 		executable
+
+$(boot-jar): $(stage2).d
+	wd=$$(pwd); cd $(stage2) && jar cf $${wd}/$(boot-jar) *
+
+$(boot-object): $(boot-jar)
+	$(converter) $(<) $(@) _binary_boot_jar_start \
+		_binary_boot_jar_end $(platform) $(arch) 1
 
 $(build)/libhello.list: $(objects) $(vm-objects-dep)
 	@mkdir -p $(dir $(@))

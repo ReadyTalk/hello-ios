@@ -68,7 +68,7 @@ getEnv(JavaVM* vm)
 {
   JavaVMInitArgs vmArgs;
   vmArgs.version = JNI_VERSION_1_2;
-  vmArgs.nOptions = 2;
+  vmArgs.nOptions = 3;
   vmArgs.ignoreUnrecognized = JNI_TRUE;
 
   JavaVMOption options[vmArgs.nOptions];
@@ -76,6 +76,7 @@ getEnv(JavaVM* vm)
 
   options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
   options[1].optionString = (char*) "-Davian.codeimage=codeimageBin";
+  options[2].optionString = (char*) "-Xbootclasspath:[bootJar]";
 
   JavaVM* vm;
   void* env;
