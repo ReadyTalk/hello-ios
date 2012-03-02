@@ -13,7 +13,7 @@ else
 	target = iPhoneOS
 	sdk = iphoneos5.0
 	arch = arm
-	arch-flag = -arch armv6
+	arch-flag = -arch armv7
 	release = Release-iphoneos
 endif
 
