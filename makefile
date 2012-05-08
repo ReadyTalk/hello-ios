@@ -5,25 +5,40 @@ run-proguard = true
 
 ifeq ($(sim),true)
 	target = iPhoneSimulator
-	sdk = iphonesimulator5.0
+	sdk = iphonesimulator$(ios-version)
 	arch = i386
 	arch-flag = -arch i386
 	release = Release-iphonesimulator
 else
 	target = iPhoneOS
-	sdk = iphoneos5.0
+	sdk = iphoneos$(ios-version)
 	arch = arm
 	arch-flag = -arch armv7
 	release = Release-iphoneos
 endif
 
-cc = /Developer/Platforms/$(target).platform/Developer/usr/bin/llvm-gcc-4.2
+developer-dir := $(shell if test -d /Developer; then echo /Developer; \
+	else echo /Applications/Xcode.app/Contents/Developer; fi)
+
+sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
+
+ios-version := $(shell if test -d $(sdk-dir)/$(target)5.1.sdk; then echo 5.1; \
+	elif test -d $(sdk-dir)/$(target)5.0.sdk; then echo 5.0; \
+	elif test -d $(sdk-dir)/$(target)4.3.sdk; then echo 4.3; \
+  elif test -d $(sdk-dir)/$(target)4.2.sdk; then echo 4.2; \
+  else echo; fi)
+
+ifeq ($(ios-version),)
+	x := $(error "couldn't find SDK")
+endif
+
+cc = $(developer-dir)/Platforms/$(target).platform/Developer/usr/bin/llvm-gcc-4.2
 
 javac = "$(JAVA_HOME)/bin/javac"
+java = "$(JAVA_HOME)/bin/java"
 jar = "$(JAVA_HOME)/bin/jar"
 
-flags = -isysroot \
-	/Developer/Platforms/$(target).platform/Developer/SDKs/$(target)5.0.sdk \
+flags = -isysroot $(sdk-dir)/$(target)$(ios-version).sdk \
 	$(arch-flag)
 
 cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 \
@@ -67,6 +82,25 @@ else
 		build/boot-jar.o
 endif
 
+ifneq ($(openjdk),)
+	ifneq ($(openjdk-src),)
+	  options := $(options)-openjdk-src
+	else
+		options := $(options)-openjdk
+	endif
+
+	proguard-flags += -include $(vm)/openjdk.pro
+else
+	proguard-flags += -overloadaggressively	
+endif
+
+ifeq ($(process),compile)
+	vm-targets = \
+		build/$(platform)-$(arch)$(options)/bootimage-generator \
+		build/$(platform)-$(arch)$(options)/classpath.jar \
+		build/$(platform)-$(arch)$(options)/libavian.a
+endif
+
 xcode-build = hello/build
 build = build
 src = src
@@ -76,7 +110,7 @@ vm = ../avian
 vm-build = $(vm)/build/$(platform)-$(arch)$(options)
 converter = $(vm-build)/binaryToObject
 bootimage-generator = $(vm-build)/bootimage-generator
-proguard = ../proguard4.6beta1/lib/proguard.jar
+proguard = ../proguard4.7/lib/proguard.jar
 
 vm-objects-dep = $(build)/vm-objects.d
 vm-classes-dep = $(build)/vm-classes.d
@@ -88,10 +122,8 @@ all-javas := $(shell find $(src) -name '*.java')
 javas = $(src)/$(main-class).java
 classes = $(call java-classes,$(javas),$(src),$(stage1))
 
-bootimage-bin = $(build)/bootimage.bin
 bootimage-object = $(build)/bootimage-bin.o
 
-codeimage-bin = $(build)/codeimage.bin
 codeimage-object = $(build)/codeimage-bin.o
 
 boot-jar = $(build)/boot.jar
@@ -106,8 +138,13 @@ run: build
 
 .PHONY: make-vm
 make-vm:
-	(cd $(vm) && \
-	 make mode=$(mode) arch=$(arch) platform=$(platform) process=$(process) $(bootimage) ios=true)
+	(cd $(vm) && make arch=$(arch) platform=$(platform) process=$(process) \
+		"openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)" $(bootimage) ios=true \
+		$(vm-targets))
+
+.PHONY: xcode-build
+xcode-build:
+	(cd hello && xcodebuild -sdk $(sdk) build)
 
 $(classes): $(all-javas)
 	@rm -rf $(stage1)
@@ -125,8 +162,7 @@ $(vm-classes-dep): $(classes)
 	cp -r $(vm-build)/classpath/* $(stage1)
 	@touch $(@)
 
-$(xcode-build)/$(release)/hello.app/hello: $(build)/libhello.list
-	(cd hello && xcodebuild -sdk $(sdk) build)
+$(xcode-build)/$(release)/hello.app/hello: $(build)/libhello.list xcode-build
 
 $(build)/%.o: $(src)/%.m
 	@mkdir -p $(dir $(@))
@@ -140,11 +176,15 @@ $(stage2).d: $(classes) $(vm-classes-dep)
 	@mkdir -p $(dir $(@))
 	rm -rf $(stage2)
 ifeq ($(run-proguard),true)
-	java -jar $(proguard) \
+	$(java) -jar $(proguard) \
 		-injars $(stage1) \
 		-outjars $(stage2) \
 		-dontusemixedcaseclassnames \
+		-dontwarn \
+		-dontoptimize \
+		-dontobfuscate \
 		@$(vm)/vm.pro \
+		$(proguard-flags) \
 		@hello.pro
 else
 	mkdir -p $(stage2)
@@ -152,20 +192,8 @@ else
 endif
 	@touch $(@)
 
-$(bootimage-bin): $(stage2).d
-	$(bootimage-generator) $(stage2) $(@) $(codeimage-bin)
-
-$(bootimage-object): $(bootimage-bin) $(converter)
-	@echo "creating $(@)"
-	$(converter) $(<) $(@) _binary_bootimage_bin_start \
-		_binary_bootimage_bin_end $(platform) $(arch) 8 \
-		writable
-
-$(codeimage-object): $(bootimage-bin) $(converter)
-	@echo "creating $(@)"
-	$(converter) $(codeimage-bin) $(@) _binary_codeimage_bin_start \
-		_binary_codeimage_bin_end $(platform) $(arch) 8 \
-		executable
+$(bootimage-object): $(stage2).d
+	$(bootimage-generator) $(stage2) $(@) $(codeimage-object)
 
 $(boot-jar): $(stage2).d
 	wd=$$(pwd); cd $(stage2) && jar cf $${wd}/$(boot-jar) *
