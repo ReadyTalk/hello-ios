@@ -193,7 +193,8 @@ endif
 	@touch $(@)
 
 $(bootimage-object): $(stage2).d
-	$(bootimage-generator) $(stage2) $(@) $(codeimage-object)
+	$(bootimage-generator) -cp $(stage2) -bootimage $(@) \
+		-codeimage $(codeimage-object)
 
 $(boot-jar): $(stage2).d
 	wd=$$(pwd); cd $(stage2) && jar cf $${wd}/$(boot-jar) *
