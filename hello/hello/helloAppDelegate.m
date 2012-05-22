@@ -76,7 +76,7 @@ getEnv(JavaVM* vm)
 
   options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
   options[1].optionString = (char*) "-Davian.codeimage=codeimageBin";
-  options[2].optionString = (char*) "-Xbootclasspath:[bootJar]";
+  options[2].optionString = (char*) "-Xbootclasspath:[bootJar]:[resourcesJar]";
 
   JavaVM* vm;
   void* env;

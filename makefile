@@ -90,6 +90,7 @@ ifneq ($(openjdk),)
 	endif
 
 	proguard-flags += -include $(vm)/openjdk.pro
+	resources-object = $(build)/resources-jar.o
 else
 	proguard-flags += -overloadaggressively	
 endif
@@ -106,9 +107,10 @@ build = build
 src = src
 stage1 = $(build)/stage1
 stage2 = $(build)/stage2
+resources = $(build)/resources
 vm = ../avian
 vm-build = $(vm)/build/$(platform)-$(arch)$(options)
-converter = $(vm-build)/binaryToObject
+converter = $(vm-build)/binaryToObject/binaryToObject
 bootimage-generator = $(vm-build)/bootimage-generator
 proguard = ../proguard4.7/lib/proguard.jar
 
@@ -162,6 +164,13 @@ $(vm-classes-dep): $(classes)
 	cp -r $(vm-build)/classpath/* $(stage1)
 	@touch $(@)
 
+$(build)/resources.jar: $(resources).d
+	wd=$$(pwd); cd $(resources) && jar cf $${wd}/$(build)/resources.jar *
+
+$(build)/resources-jar.o: $(build)/resources.jar
+	$(converter) $(<) $(@) _binary_resources_jar_start \
+		_binary_resources_jar_end $(platform) $(arch) 1
+
 $(xcode-build)/$(release)/hello.app/hello: $(build)/libhello.list xcode-build
 
 $(build)/%.o: $(src)/%.m
@@ -192,6 +201,14 @@ else
 endif
 	@touch $(@)
 
+$(resources).d: $(stage2).d
+	@mkdir -p $(dir $(@))
+	rm -rf $(resources)
+	mkdir -p $(resources)
+	wd=$$(pwd); cd $(stage2) && find . -type f -not -name '*.class' \
+		| xargs tar cf - | tar xf - -C $${wd}/$(resources)
+	@touch $(@)
+
 $(bootimage-object): $(stage2).d
 	$(bootimage-generator) -cp $(stage2) -bootimage $(@) \
 		-codeimage $(codeimage-object)
@@ -203,11 +220,11 @@ $(boot-object): $(boot-jar)
 	$(converter) $(<) $(@) _binary_boot_jar_start \
 		_binary_boot_jar_end $(platform) $(arch) 1
 
-$(build)/libhello.list: $(objects) $(vm-objects-dep)
+$(build)/libhello.list: $(objects) $(vm-objects-dep) $(resources-object)
 	@mkdir -p $(dir $(@))
 	rm -rf $(@)
 	mkdir -p $(build)/libhello
-	cp $(objects) $(build)/vm-objects/*.o $(build)/libhello
+	cp $(objects) $(build)/vm-objects/*.o $(resources-object) $(build)/libhello
 	for x in $(build)/libhello/*.o; do echo ../$${x}; done > $(@)
 
 $(build)/main: $(build)/main.o $(objects) $(vm-objects-dep)

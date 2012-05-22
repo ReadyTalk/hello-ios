@@ -30,6 +30,18 @@ codeimageBin(unsigned* size)
   return CODEIMAGE_BIN(start);
 }
 
+#define RESOURCES_JAR(x) _binary_resources_jar_##x
+
+extern const uint8_t RESOURCES_JAR(start)[];
+extern const uint8_t RESOURCES_JAR(end)[];
+
+EXPORT const uint8_t*
+resourcesJar(unsigned* size)
+{
+  *size = RESOURCES_JAR(end) - RESOURCES_JAR(start);
+  return RESOURCES_JAR(start);
+}
+
 #else // not BOOT_IMAGE
 
 #define BOOT_JAR(x) _binary_boot_jar_##x
