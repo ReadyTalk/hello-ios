@@ -91,6 +91,7 @@ ifneq ($(openjdk),)
 
 	proguard-flags += -include $(vm)/openjdk.pro
 	resources-object = $(build)/resources-jar.o
+	cflags += -DRESOURCES
 else
 	proguard-flags += -overloadaggressively	
 endif
