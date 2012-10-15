@@ -41,7 +41,7 @@ jar = "$(JAVA_HOME)/bin/jar"
 flags = -isysroot $(sdk-dir)/$(target)$(ios-version).sdk \
 	$(arch-flag)
 
-cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 \
+cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 -DRESOURCES \
 	-fobjc-abi-version=2 -fobjc-legacy-dispatch \
 	-I/System/Library/Frameworks/JavaVM.framework/Headers
 
@@ -90,8 +90,6 @@ ifneq ($(openjdk),)
 	endif
 
 	proguard-flags += -include $(vm)/openjdk.pro
-	resources-object = $(build)/resources-jar.o
-	cflags += -DRESOURCES
 else
 	proguard-flags += -overloadaggressively	
 endif
@@ -99,6 +97,7 @@ endif
 ifeq ($(process),compile)
 	vm-targets = \
 		build/$(platform)-$(arch)$(options)/bootimage-generator \
+		build/$(platform)-$(arch)$(options)/binaryToObject/binaryToObject \
 		build/$(platform)-$(arch)$(options)/classpath.jar \
 		build/$(platform)-$(arch)$(options)/libavian.a
 endif
@@ -115,6 +114,8 @@ converter = $(vm-build)/binaryToObject/binaryToObject
 bootimage-generator = $(vm-build)/bootimage-generator
 proguard = ../proguard4.7/lib/proguard.jar
 
+resources-object = $(build)/resources-jar.o
+
 vm-objects-dep = $(build)/vm-objects.d
 vm-classes-dep = $(build)/vm-classes.d
 
@@ -122,6 +123,7 @@ java-classes = $(foreach x,$(1),$(patsubst $(2)/%.java,$(3)/%.class,$(x)))
 
 main-class = Hello
 all-javas := $(shell find $(src) -name '*.java')
+all-properties := $(shell find $(src) -name '*.properties')
 javas = $(src)/$(main-class).java
 classes = $(call java-classes,$(javas),$(src),$(stage1))
 
@@ -149,11 +151,12 @@ make-vm:
 xcode-build:
 	(cd hello && xcodebuild -sdk $(sdk) build)
 
-$(classes): $(all-javas)
+$(classes): $(all-javas) $(all-properties)
 	@rm -rf $(stage1)
 	@mkdir -p $(stage1)
 	$(javac) -d $(stage1) -sourcepath $(src) \
 		-bootclasspath $(vm-build)/classpath $(javas)
+	cp $(all-properties) $(stage1)/
 
 $(vm-objects-dep):
 	@mkdir -p $(build)/vm-objects
