@@ -3,11 +3,11 @@ steps required to build it:
 
   1. Get Avian:
 
-    git clone git://oss.readytalk.com/avian.git
+    git clone https://github.com/ReadyTalk/avian
 
   2. Get this example, if you don't already have it:
 
-    git clone git://oss.readytalk.com/hello-ios.git
+    git clone https://github.com/ReadyTalk/hello-ios
 
   3. Build the example.  The default target is an iPhoneOS device,
   which requires that XCode be configured with a valid iOS developer
