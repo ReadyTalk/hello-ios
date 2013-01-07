@@ -1,6 +1,8 @@
 Avian on iOS example
 ====================
 
+[![Build Status](https://travis-ci.org/ReadyTalk/hello-ios.png?branch=master)](https://travis-ci.org/ReadyTalk/hello-ios)
+
 This is a simple example of how to use Avian on iOS.  These are the
 steps required to build it:
 
