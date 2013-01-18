@@ -22,7 +22,8 @@ developer-dir := $(shell if test -d /Developer; then echo /Developer; \
 
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
-ios-version := $(shell if test -d $(sdk-dir)/$(target)5.1.sdk; then echo 5.1; \
+ios-version := $(shell if test -d $(sdk-dir)/$(target)6.0.sdk; then echo 6.0; \
+	elif test -d $(sdk-dir)/$(target)5.1.sdk; then echo 5.1; \
 	elif test -d $(sdk-dir)/$(target)5.0.sdk; then echo 5.0; \
 	elif test -d $(sdk-dir)/$(target)4.3.sdk; then echo 4.3; \
   elif test -d $(sdk-dir)/$(target)4.2.sdk; then echo 4.2; \
