@@ -96,6 +96,23 @@ else
 	proguard-flags += -overloadaggressively	
 endif
 
+ifneq ($(android),)
+	options := $(options)-android
+
+	android-archives = \
+		$(android)/icu4c/lib/libicui18n.a \
+		$(android)/icu4c/lib/libicuuc.a \
+		$(android)/icu4c/lib/libicudata.a \
+		$(android)/fdlibm/libfdm.a \
+		$(android)/expat/.libs/libexpat.a \
+		$(android)/openssl-upstream/libssl.a \
+		$(android)/openssl-upstream/libcrypto.a
+
+	classpath-lflags = $(android-archives) -lstdc++
+
+	proguard-flags += -include $(vm)/android.pro -dontoptimize -dontobfuscate
+endif
+
 ifeq ($(process),compile)
 	vm-targets = \
 		build/$(platform)-$(arch)$(options)/bootimage-generator \
@@ -147,7 +164,7 @@ run: build
 make-vm:
 	(cd $(vm) && make arch=$(arch) platform=$(platform) process=$(process) \
 		"openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)" $(bootimage) ios=true \
-		$(vm-targets))
+		android=$(android) $(vm-targets))
 
 .PHONY: xcode-build
 xcode-build:
@@ -163,7 +180,7 @@ $(classes): $(all-javas) $(all-properties)
 $(vm-objects-dep):
 	@mkdir -p $(build)/vm-objects
 	(wd=$$(pwd) && cd $(build)/vm-objects \
-		&& ar x  $${wd}/$(vm-build)/libavian.a)
+		&& ar x $${wd}/$(vm-build)/libavian.a)
 	@touch $(@)
 
 $(vm-classes-dep): $(classes)
@@ -226,12 +243,15 @@ $(boot-object): $(boot-jar)
 	$(converter) $(<) $(@) _binary_boot_jar_start \
 		_binary_boot_jar_end $(platform) $(arch) 1
 
-$(build)/libhello.list: $(objects) $(vm-objects-dep) $(resources-object)
+$(build)/libhello.list: $(objects) $(vm-objects-dep) $(resources-object) \
+		$(android-archives)
 	@mkdir -p $(dir $(@))
 	rm -rf $(@)
 	mkdir -p $(build)/libhello
 	cp $(objects) $(build)/vm-objects/*.o $(resources-object) $(build)/libhello
-	for x in $(build)/libhello/*.o; do echo ../$${x}; done > $(@)
+	(cd $(build)/libhello \
+		&& for x in $(android-archives); do ar x $${x}; done)
+	for x in $(build)/libhello/*; do echo ../$${x}; done > $(@)
 
 $(build)/main: $(build)/main.o $(objects) $(vm-objects-dep)
 	$(cc) $(lflags) $(build)/main.o $(objects) $(build)/vm-objects/*.o -o $(@)

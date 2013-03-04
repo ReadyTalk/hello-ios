@@ -247,6 +247,7 @@
 					"-filelist",
 					../build/libhello.list,
 					"-lz",
+					"-lstdc++",
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -272,6 +273,7 @@
 					"-filelist",
 					../build/libhello.list,
 					"-lz",
+					"-lstdc++",
 				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
