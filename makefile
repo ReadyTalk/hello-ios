@@ -100,11 +100,11 @@ ifneq ($(android),)
 	options := $(options)-android
 
 	android-archives = \
-		$(android)/icu4c/lib/libicui18n.a \
-		$(android)/icu4c/lib/libicuuc.a \
-		$(android)/icu4c/lib/libicudata.a \
-		$(android)/fdlibm/libfdm.a \
-		$(android)/expat/.libs/libexpat.a \
+		$(android)/external/icu4c/lib/libicui18n.a \
+		$(android)/external/icu4c/lib/libicuuc.a \
+		$(android)/external/icu4c/lib/libicudata.a \
+		$(android)/external/fdlibm/libfdm.a \
+		$(android)/external/expat/.libs/libexpat.a \
 		$(android)/openssl-upstream/libssl.a \
 		$(android)/openssl-upstream/libcrypto.a
 
@@ -131,7 +131,7 @@ vm = ../avian
 vm-build = $(vm)/build/$(platform)-$(arch)$(options)
 converter = $(vm-build)/binaryToObject/binaryToObject
 bootimage-generator = $(vm-build)/bootimage-generator
-proguard = ../proguard4.7/lib/proguard.jar
+proguard = ../proguard4.8/lib/proguard.jar
 
 resources-object = $(build)/resources-jar.o
 
