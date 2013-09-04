@@ -17,7 +17,7 @@ else
 	release = Release-iphoneos
 endif
 
-developer-dir := $(shell if test -d /Developer; then echo /Developer; \
+developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Developer/SDKs; then echo /Developer; \
 	else echo /Applications/Xcode.app/Contents/Developer; fi)
 
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
