@@ -17,24 +17,22 @@ else
 	release = Release-iphoneos
 endif
 
-developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Developer/SDKs; then echo /Developer; \
+developer-dir := $(shell if test -d /Developer; then echo /Developer; \
 	else echo /Applications/Xcode.app/Contents/Developer; fi)
 
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
-ios-version := $(shell if test -d $(sdk-dir)/$(target)6.1.sdk; then echo 6.1; \
+ios-version := $(shell \
+    if test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
+	elif test -d $(sdk-dir)/$(target)6.1.sdk; then echo 6.1; \
 	elif test -d $(sdk-dir)/$(target)6.0.sdk; then echo 6.0; \
-	elif test -d $(sdk-dir)/$(target)5.1.sdk; then echo 5.1; \
-	elif test -d $(sdk-dir)/$(target)5.0.sdk; then echo 5.0; \
-	elif test -d $(sdk-dir)/$(target)4.3.sdk; then echo 4.3; \
-  elif test -d $(sdk-dir)/$(target)4.2.sdk; then echo 4.2; \
   else echo; fi)
 
 ifeq ($(ios-version),)
 	x := $(error "couldn't find SDK")
 endif
 
-cc = $(developer-dir)/Platforms/$(target).platform/Developer/usr/bin/llvm-gcc-4.2
+cc = cc
 
 javac = "$(JAVA_HOME)/bin/javac"
 java = "$(JAVA_HOME)/bin/java"
