@@ -23,10 +23,11 @@ developer-dir := $(shell if test -d /Developer; then echo /Developer; \
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
 ios-version := $(shell \
-    if test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
+		if test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
+	elif test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
 	elif test -d $(sdk-dir)/$(target)6.1.sdk; then echo 6.1; \
 	elif test -d $(sdk-dir)/$(target)6.0.sdk; then echo 6.0; \
-  else echo; fi)
+	else echo; fi)
 
 ifeq ($(ios-version),)
 	x := $(error "couldn't find SDK")
@@ -84,7 +85,7 @@ endif
 
 ifneq ($(openjdk),)
 	ifneq ($(openjdk-src),)
-	  options := $(options)-openjdk-src
+		options := $(options)-openjdk-src
 	else
 		options := $(options)-openjdk
 	endif
@@ -129,7 +130,7 @@ vm = ../avian
 vm-build = $(vm)/build/$(platform)-$(arch)$(options)
 converter = $(vm-build)/binaryToObject/binaryToObject
 bootimage-generator = $(vm-build)/bootimage-generator
-proguard = ../proguard4.8/lib/proguard.jar
+proguard = ../proguard4.11/lib/proguard.jar
 
 resources-object = $(build)/resources-jar.o
 

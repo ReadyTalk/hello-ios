@@ -8,11 +8,16 @@ __1.__ Get Avian:
 
     $ git clone https://github.com/ReadyTalk/avian
 
-__2.__ Get this example, if you don't already have it:  
+__2.__ Get ProGuard:
+
+    $ curl -Of http://oss.readytalk.com/avian-web/proguard4.11.tar.gz
+    $ tar xzf proguard4.11.tar.gz
+
+__3.__ Get this example, if you don't already have it:
 
     $ git clone https://github.com/ReadyTalk/hello-ios
 
-__3.__ Build the example.  The default target is an iPhoneOS device,
+__4.__ Build the example.  The default target is an iPhoneOS device,
 which requires that XCode be configured with a valid iOS developer
 certificate.  
 
