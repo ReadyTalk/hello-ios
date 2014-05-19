@@ -112,6 +112,10 @@ getEnv(JavaVM* vm)
     }
   }
 
+  if ((*e)->ExceptionCheck(e)) {
+    (*e)->ExceptionDescribe(e);
+  }
+
   self.vm = vm;
 
   return (*e)->ExceptionCheck(e) ? NO : YES;
