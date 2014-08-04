@@ -3,6 +3,12 @@
 
 void __cxa_pure_virtual(void) { abort(); }
 
+#ifdef USE_LZMA
+const int hello_ios_use_lzma = 1;
+#else
+const int hello_ios_use_lzma = 0;
+#endif
+
 #define EXPORT __attribute__ ((visibility("default"))) __attribute__ ((used))
 
 #ifdef BOOT_IMAGE

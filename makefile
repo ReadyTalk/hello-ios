@@ -70,6 +70,12 @@ ifneq ($(mode),fast)
 	options := -$(mode)
 endif
 
+ifneq ($(lzma),)
+	options := $(options)-lzma
+	cflags += -DUSE_LZMA
+	bootimage-flags += -use-lzma
+endif
+
 ifeq ($(process),compile)
 	options := $(options)-bootimage
 	bootimage = bootimage=true
@@ -233,7 +239,7 @@ $(resources).d: $(stage2).d
 
 $(bootimage-object): $(stage2).d
 	$(bootimage-generator) -cp $(stage2) -bootimage $(@) \
-		-codeimage $(codeimage-object)
+		-codeimage $(codeimage-object) $(bootimage-flags)
 
 $(boot-jar): $(stage2).d
 	wd=$$(pwd); cd $(stage2) && jar cf $${wd}/$(boot-jar) *

@@ -1,6 +1,8 @@
 #include <stdint.h>
 #import "helloAppDelegate.h"
 
+extern int hello_ios_use_lzma;
+
 static JNIEnv*
 getEnv(JavaVM* vm)
 {
@@ -74,7 +76,11 @@ getEnv(JavaVM* vm)
   JavaVMOption options[vmArgs.nOptions];
   vmArgs.options = options;
 
-  options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
+  if (hello_ios_use_lzma) {
+    options[0].optionString = (char*) "-Davian.bootimage=lzma:bootimageBin";
+  } else {
+    options[0].optionString = (char*) "-Davian.bootimage=bootimageBin";
+  }
   options[1].optionString = (char*) "-Davian.codeimage=codeimageBin";
   options[2].optionString = (char*) "-Xbootclasspath:[bootJar]:[resourcesJar]";
 
