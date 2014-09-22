@@ -1,6 +1,7 @@
 #include <jni.h>
 #import <UIKit/UIKit.h>
 
+#undef JNIEXPORT
 #define JNIEXPORT __attribute__ ((visibility("default"))) \
   __attribute__ ((used))
 
