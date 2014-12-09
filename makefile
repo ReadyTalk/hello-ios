@@ -12,8 +12,12 @@ ifeq ($(sim),true)
 else
 	target = iPhoneOS
 	sdk = iphoneos$(ios-version)
-	arch = arm
-	arch-flag = -arch armv7
+	ifeq ($(arch),arm64)
+		arch-flag = -arch arm64
+	else
+		arch = arm
+		arch-flag = -arch armv7
+	endif
 	release = Release-iphoneos
 endif
 
@@ -23,7 +27,9 @@ developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Deve
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
 ios-version := $(shell \
-		if test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
+		if test -d $(sdk-dir)/$(target)8.1.sdk; then echo 8.1; \
+	elif test -d $(sdk-dir)/$(target)8.0.sdk; then echo 8.0; \
+	elif test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
 	elif test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
 	elif test -d $(sdk-dir)/$(target)6.1.sdk; then echo 6.1; \
 	elif test -d $(sdk-dir)/$(target)6.0.sdk; then echo 6.0; \
@@ -179,6 +185,7 @@ $(classes): $(all-javas) $(all-properties)
 	@rm -rf $(stage1)
 	@mkdir -p $(stage1)
 	$(javac) -d $(stage1) -sourcepath $(src) \
+		-source 1.7 -target 1.7 \
 		-bootclasspath $(vm-build)/classpath $(javas)
 	cp $(all-properties) $(stage1)/
 
