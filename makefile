@@ -6,8 +6,12 @@ run-proguard = true
 ifeq ($(sim),true)
 	target = iPhoneSimulator
 	sdk = iphonesimulator$(ios-version)
-	arch = i386
-	arch-flag = -arch i386
+	ifeq ($(arch),x86_64)
+		arch-flag = -arch x86_64
+	else
+		arch = i386
+		arch-flag = -arch i386
+	endif
 	release = Release-iphonesimulator
 else
 	target = iPhoneOS
@@ -27,7 +31,8 @@ developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Deve
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
 ios-version := $(shell \
-		if test -d $(sdk-dir)/$(target)8.1.sdk; then echo 8.1; \
+		if test -d $(sdk-dir)/$(target)8.2.sdk; then echo 8.2; \
+	elif test -d $(sdk-dir)/$(target)8.1.sdk; then echo 8.1; \
 	elif test -d $(sdk-dir)/$(target)8.0.sdk; then echo 8.0; \
 	elif test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
 	elif test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
@@ -104,7 +109,7 @@ ifneq ($(openjdk),)
 
 	proguard-flags += -include $(vm)/openjdk.pro
 else
-	proguard-flags += -overloadaggressively	
+	proguard-flags += -overloadaggressively
 endif
 
 ifneq ($(android),)
