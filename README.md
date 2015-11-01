@@ -17,26 +17,15 @@ __3.__ Get this example, if you don't already have it:
 
     $ git clone https://github.com/ReadyTalk/hello-ios
 
-__4.__ Build the example.  The default target is an iPhoneOS device,
-which requires that XCode be configured with a valid iOS developer
-certificate.  
+__4.__ Build the example.  The default target is an iPhoneOS 64 bit simulator. Uncomment related lines to build for another target.
 
-    $ cd hello-ios && make
+    $ cd hello-ios && ./build-hello.sh
 
-The codesign step may fail with the message "User interaction is not
+When building for an iPhoneOS device, the codesign step may fail with the message "User interaction is not
 allowed."  To fix this, you'll need to unlock your keychain and try
 again:  
 
     $ security unlock-keychain ~/Library/Keychains/login.keychain
-
-Alternatively, you can target the iPhoneSimulator instead, which
-does not require code signing:  
-
-    $ make sim=true
-
-You can also run the result in the simulator:  
-  
-    $ make sim=true run
 
 Please send an email to avian@googlegroups.com if you have any
 questions or comments.
