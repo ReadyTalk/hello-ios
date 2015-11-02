@@ -1,11 +1,3 @@
-//
-//  VMContext.m
-//  hello
-//
-//  Created by Benjamin Stadin on 01.11.15.
-//  Copyright © 2015 HDM. All rights reserved.
-//
-
 #import "VMContext.h"
 
 extern int hello_ios_use_lzma;

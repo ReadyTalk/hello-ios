@@ -1,11 +1,3 @@
-//
-//  helloTests.m
-//  helloTests
-//
-//  Created by Benjamin Stadin on 01.11.15.
-//  Copyright © 2015 HDM. All rights reserved.
-//
-
 #import <XCTest/XCTest.h>
 
 @interface helloTests : XCTestCase
