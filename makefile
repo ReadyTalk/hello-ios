@@ -1,26 +1,33 @@
 platform = ios
 mode = fast
 process = compile
-run-proguard = true
+run-proguard = false
 
+# Must match the deplyoment target setting of the Xcode project. Note that
+# an iOS SDK 9 can target 8.0 and upwards. And this is common.
+ios_deployment_target=8.0
+
+# xcodebuild needs armv7, avian needs arm instead
+arch-xcode-name = $(arch)
 ifeq ($(sim),true)
 	target = iPhoneSimulator
 	sdk = iphonesimulator$(ios-version)
-	ifeq ($(arch),x86_64)
-		arch-flag = -arch x86_64
-	else
-		arch = i386
+	ifeq ($(arch),i386)
 		arch-flag = -arch i386
+	else
+		arch = x86_64
+		arch-flag = -arch x86_64
 	endif
 	release = Release-iphonesimulator
 else
 	target = iPhoneOS
 	sdk = iphoneos$(ios-version)
-	ifeq ($(arch),arm64)
-		arch-flag = -arch arm64
-	else
-		arch = arm
+	ifeq ($(arch),arm)
+		arch-xcode-name = armv7
 		arch-flag = -arch armv7
+	else
+		arch = arm64
+		arch-flag = -arch arm64
 	endif
 	release = Release-iphoneos
 endif
@@ -31,7 +38,10 @@ developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Deve
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
 ios-version := $(shell \
-		if test -d $(sdk-dir)/$(target)8.2.sdk; then echo 8.2; \
+		if test -L $(sdk-dir)/$(target)9.1.sdk; then echo 9.1; \
+	elif test -L $(sdk-dir)/$(target)9.0.sdk; then echo 9.0; \
+	elif test -d $(sdk-dir)/$(target)8.3.sdk; then echo 8.3; \
+	elif test -d $(sdk-dir)/$(target)8.2.sdk; then echo 8.2; \
 	elif test -d $(sdk-dir)/$(target)8.1.sdk; then echo 8.1; \
 	elif test -d $(sdk-dir)/$(target)8.0.sdk; then echo 8.0; \
 	elif test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
@@ -53,9 +63,13 @@ jar = "$(JAVA_HOME)/bin/jar"
 flags = -isysroot $(sdk-dir)/$(target)$(ios-version).sdk \
 	$(arch-flag)
 
-cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=30202 -DRESOURCES \
+# mios-version-min version now required. See:
+# http://www.openradar.me/21724015
+
+cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=80000 -DRESOURCES \
 	-fobjc-abi-version=2 -fobjc-legacy-dispatch \
-	-I/System/Library/Frameworks/JavaVM.framework/Headers
+	-I/System/Library/Frameworks/JavaVM.framework/Headers \
+	-mios-version-min=$(ios-version)
 
 ifeq ($(mode),debug)
 	cflags += -O0 -g3
@@ -178,13 +192,13 @@ run: build
 
 .PHONY: make-vm
 make-vm:
-	(cd $(vm) && make arch=$(arch) platform=$(platform) process=$(process) \
+	(cd $(vm) && make arch=$(arch) platform=$(platform) sim=$(sim) process=$(process) \
 		"openjdk=$(openjdk)" "openjdk-src=$(openjdk-src)" $(bootimage) \
 		android=$(android) $(vm-targets))
 
 .PHONY: xcode-build
 xcode-build:
-	(cd hello && xcodebuild -sdk $(sdk) build)
+	(cd hello && xcodebuild ARCHS=$(arch-xcode-name) ONLY_ACTIVE_ARCH=NO -sdk $(sdk) build)
 
 $(classes): $(all-javas) $(all-properties)
 	@rm -rf $(stage1)
