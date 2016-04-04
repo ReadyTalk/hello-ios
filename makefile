@@ -38,7 +38,8 @@ developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Deve
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
 ios-version := $(shell \
-		if test -L $(sdk-dir)/$(target)9.1.sdk; then echo 9.1; \
+		if test -L $(sdk-dir)/$(target)9.2.sdk; then echo 9.2; \
+	elif test -L $(sdk-dir)/$(target)9.1.sdk; then echo 9.1; \
 	elif test -L $(sdk-dir)/$(target)9.0.sdk; then echo 9.0; \
 	elif test -d $(sdk-dir)/$(target)8.3.sdk; then echo 8.3; \
 	elif test -d $(sdk-dir)/$(target)8.2.sdk; then echo 8.2; \
@@ -51,7 +52,7 @@ ios-version := $(shell \
 	else echo; fi)
 
 ifeq ($(ios-version),)
-	x := $(error "couldn't find SDK")
+	x := $(error "couldn't find SDK in $(sdk-dir)")
 endif
 
 cc = cc
@@ -120,6 +121,8 @@ ifneq ($(openjdk),)
 	else
 		options := $(options)-openjdk
 	endif
+
+	cflags += -I$(openjdk)/include -I$(openjdk)/include/darwin
 
 	proguard-flags += -include $(vm)/openjdk.pro
 else
