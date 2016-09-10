@@ -71,6 +71,7 @@ flags = -isysroot $(sdk-dir)/$(target)$(ios-version).sdk \
 cflags = $(flags) -D__IPHONE_OS_VERSION_MIN_REQUIRED=80000 -DRESOURCES \
 	-fobjc-abi-version=2 -fobjc-legacy-dispatch \
 	-I/System/Library/Frameworks/JavaVM.framework/Headers \
+    -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Headers \
 	-mios-version-min=$(ios-version)
 
 ifeq ($(mode),debug)
