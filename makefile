@@ -37,20 +37,10 @@ developer-dir := $(shell if test -d /Developer/Platforms/$(target).platform/Deve
 
 sdk-dir = $(developer-dir)/Platforms/$(target).platform/Developer/SDKs
 
-ios-version := $(shell \
-		if test -L $(sdk-dir)/$(target)9.3.sdk; then echo 9.3; \
-	elif test -L $(sdk-dir)/$(target)9.2.sdk; then echo 9.2; \
-	elif test -L $(sdk-dir)/$(target)9.1.sdk; then echo 9.1; \
-	elif test -L $(sdk-dir)/$(target)9.0.sdk; then echo 9.0; \
-	elif test -d $(sdk-dir)/$(target)8.3.sdk; then echo 8.3; \
-	elif test -d $(sdk-dir)/$(target)8.2.sdk; then echo 8.2; \
-	elif test -d $(sdk-dir)/$(target)8.1.sdk; then echo 8.1; \
-	elif test -d $(sdk-dir)/$(target)8.0.sdk; then echo 8.0; \
-	elif test -d $(sdk-dir)/$(target)7.1.sdk; then echo 7.1; \
-	elif test -d $(sdk-dir)/$(target)7.0.sdk; then echo 7.0; \
-	elif test -d $(sdk-dir)/$(target)6.1.sdk; then echo 6.1; \
-	elif test -d $(sdk-dir)/$(target)6.0.sdk; then echo 6.0; \
-	else echo; fi)
+ios-version := $(shell for x in 9.3 9.2 9.1 9.0 8.3 8.2 8.1 8.0; \
+			do if test -d $(sdk-dir)/$(target)$$x.sdk \
+				-o -L $(sdk-dir)/$(target)$$x.sdk; \
+			then echo $$x; break; fi; done)
 
 ifeq ($(ios-version),)
 	x := $(error "couldn't find SDK in $(sdk-dir)")
@@ -175,6 +165,12 @@ vm-classes-dep = $(build)/vm-classes.d
 
 java-classes = $(foreach x,$(1),$(patsubst $(2)/%.java,$(3)/%.class,$(x)))
 
+ifneq ($(mode),fast)
+	host-vm-options := -$(mode)
+endif
+
+host-vm = $(vm)/build/macosx-x86_64-interpret$(host-vm-options)/libjvm.dylib
+
 main-class = Hello
 all-javas := $(shell find $(src) -name '*.java')
 all-properties := $(shell find $(src) -name '*.properties')
@@ -209,7 +205,7 @@ $(classes): $(all-javas) $(all-properties)
 	@rm -rf $(stage1)
 	@mkdir -p $(stage1)
 	$(javac) -d $(stage1) -sourcepath $(src) \
-		-source 1.7 -target 1.7 \
+		-source 1.8 -target 1.8 \
 		-bootclasspath $(vm-build)/classpath $(javas)
 	cp $(all-properties) $(stage1)/
 
@@ -270,7 +266,8 @@ $(resources).d: $(stage2).d
 
 $(bootimage-object): $(stage2).d
 	$(bootimage-generator) -cp $(stage2) -bootimage $(@) \
-		-codeimage $(codeimage-object) $(bootimage-flags)
+		-codeimage $(codeimage-object) $(bootimage-flags) \
+		-hostvm $(host-vm)
 
 $(boot-jar): $(stage2).d
 	wd=$$(pwd); cd $(stage2) && jar cf $${wd}/$(boot-jar) *
